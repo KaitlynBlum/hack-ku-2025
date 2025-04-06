@@ -5,6 +5,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 export default function ViewAll() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchItems();
@@ -13,10 +14,17 @@ export default function ViewAll() {
   const fetchItems = async () => {
     try {
       const response = await fetch('http://10.104.117.117:5050/all-items');
+      if (!response.ok) {
+        throw new Error('Failed to fetch items');
+      }
       const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format');
+      }
       setItems(data);
     } catch (error) {
       console.error('Error fetching items:', error);
+      setError('Failed to load items. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -31,9 +39,12 @@ export default function ViewAll() {
         {
           text: 'Delete', style: 'destructive', onPress: async () => {
             try {
-              await fetch(`http://10.104.117.117:5050/delete-item?name=${itemName}`, {
+              const response = await fetch(`http://10.104.117.117:5050/delete-item?name=${itemName}`, {
                 method: 'DELETE',
               });
+              if (!response.ok) {
+                throw new Error('Failed to delete item');
+              }
               setItems(prev => prev.filter(item => item.name !== itemName));
             } catch (error) {
               console.error("Delete error:", error);
@@ -51,31 +62,37 @@ export default function ViewAll() {
     </TouchableOpacity>
   );
 
-  const renderItem = ({ item }) => (
-    <Swipeable renderRightActions={() => renderRightActions(item.name)}>
-      <View style={styles.card}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        {item.photo && <Image source={{ uri: item.photo }} style={styles.image} />}
-        {item.locations.length > 0 ? (
-          item.locations.map((loc, idx) => (
-            <Text key={idx} style={styles.location}>• {loc}</Text>
-          ))
-        ) : (
-          <Text style={styles.locationEmpty}>No saved locations</Text>
-        )}
-      </View>
-    </Swipeable>
-  );
+  const renderItem = ({ item }) => {
+    if (!item || !item.name) return null; // Ensure item and name exist
+
+    return (
+      <Swipeable renderRightActions={() => renderRightActions(item.name)}>
+        <View style={styles.card}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          {item.photo && <Image source={{ uri: item.photo }} style={styles.image} />}
+          {item.locations && item.locations.length > 0 ? (
+            item.locations.map((loc, idx) => (
+              <Text key={idx} style={styles.location}>• {loc}</Text>
+            ))
+          ) : (
+            <Text style={styles.locationEmpty}>No saved locations</Text>
+          )}
+        </View>
+      </Swipeable>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>📦 All Stored Items</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#1fc485" />
+      ) : error ? (
+        <Text style={styles.error}>{error}</Text>
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(item, index) => item.name + index}
+          keyExtractor={(item, index) => (item.name || 'unknown') + index}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
         />
@@ -138,5 +155,11 @@ const styles = StyleSheet.create({
   deleteText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  error: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });

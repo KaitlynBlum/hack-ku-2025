@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ActivityIndicator, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 
 const Search = () => {
@@ -7,9 +7,15 @@ const Search = () => {
   const [searchInput, setSearchInput] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   const handleSearch = async () => {
     if (!searchInput) return;
+
+    setLoading(true);
+    setResult(null);
+    setError(null);
 
     try {
       const response = await fetch(`http://10.104.117.117:5050/retrieve?name=${searchInput}`);
@@ -18,6 +24,11 @@ const Search = () => {
       if (response.ok) {
         setResult(data);
         setError(null);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
       } else {
         setError(data.error);
         setResult(null);
@@ -26,12 +37,14 @@ const Search = () => {
       console.error(err);
       setError('Something went wrong.');
       setResult(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Search</Text>
+      <Text style={styles.title}>🔍 Search Items</Text>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -39,17 +52,21 @@ const Search = () => {
           style={styles.searchInput}
           value={searchInput}
           onChangeText={setSearchInput}
-          placeholder="Enter item to search"
+          placeholder="Type item name here..."
+          placeholderTextColor="gray"
         />
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Loading Indicator */}
+      {loading && <ActivityIndicator size="large" color="#1fc485" style={styles.loader} />}
+
       {/* Results */}
       {result && (
-        <View style={styles.resultContainer}>
-          <Text style={styles.results}>You have {result.locations.length} {result.name}(s) at:</Text>
+        <Animated.View style={[styles.resultContainer, { opacity: fadeAnim }]}>
+          <Text style={styles.results}>📍 Found {result.locations.length} location(s) for "{result.name}":</Text>
           {result.locations.map((loc, index) => (
             <Text key={index} style={styles.location}>• {loc}</Text>
           ))}
@@ -57,10 +74,11 @@ const Search = () => {
           {result.photo && (
             <Image source={{ uri: result.photo }} style={styles.image} />
           )}
-        </View>
+        </Animated.View>
       )}
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {/* Error Message */}
+      {error && <Text style={styles.error}>❌ {error}</Text>}
     </View>
   );
 };
@@ -93,6 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
     fontSize: 16,
+    color: 'black',
   },
   searchButton: {
     backgroundColor: '#1fc485',
@@ -107,6 +126,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  loader: {
+    marginTop: 20,
   },
   results: {
     fontSize: 20,
@@ -129,9 +151,19 @@ const styles = StyleSheet.create({
     height: 200,
     marginTop: 20,
     borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#1fc485',
   },
   resultContainer: {
     alignItems: 'center',
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#f0fdf6',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
 });
 

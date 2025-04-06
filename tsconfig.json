@@ -13,6 +13,6 @@
     "**/*.js",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ],
+, "app/landing.jsx", "app/landing.jsx", "app/landing.jsx", "app/landing.jsx"  ],
   "extends": "expo/tsconfig.base"
 }

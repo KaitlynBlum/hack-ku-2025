@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Image, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 const Add = () => {
@@ -7,11 +7,12 @@ const Add = () => {
   const [itemName, setItemName] = useState('');
   const [location, setLocation] = useState('');
   const [imageUri, setImageUri] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleTakePhoto = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert('Permission required', 'Camera access is required to take a photo.');
+      Alert.alert('🚫 Permission required', 'Camera access is required to take a photo.');
       return;
     }
 
@@ -29,7 +30,7 @@ const Add = () => {
 
   const handleAddItem = async (action = 'check') => {
     if (!itemName || !location) {
-      Alert.alert('Error', 'Please enter both item name and location.');
+      Alert.alert('⚠️ Error', 'Please enter both item name and location.');
       return;
     }
 
@@ -40,6 +41,7 @@ const Add = () => {
     };
 
     if (imageUri) {
+      setUploading(true);
       const response = await fetch(imageUri);
       const blob = await response.blob();
       const formData = new FormData();
@@ -62,6 +64,9 @@ const Add = () => {
         }
       } catch (error) {
         console.error('Image upload failed:', error);
+        Alert.alert('❌ Error', 'Image upload failed.');
+      } finally {
+        setUploading(false);
       }
     }
 
@@ -76,7 +81,7 @@ const Add = () => {
 
       if (data.duplicate) {
         Alert.alert(
-          'Duplicate Item',
+          '⚠️ Duplicate Item',
           data.message,
           [
             { text: 'Overwrite', onPress: () => handleAddItem('overwrite'), style: 'destructive' },
@@ -87,27 +92,31 @@ const Add = () => {
         );
       } else {
         setItemAdded(true);
-        Alert.alert('Success', data.message);
+        Alert.alert('✅ Success', data.message);
         setItemName('');
         setLocation('');
         setImageUri(null);
       }
     } catch (error) {
       console.error("Error while sending:", error);
-      Alert.alert('Error', 'Could not connect to server');
+      Alert.alert('❌ Error', 'Could not connect to server');
     }
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>📝 Add New Item</Text>
+
       <TextInput
-        placeholder="Enter item name"
+        placeholder="Enter item name 🏷️"
+        placeholderTextColor="gray" // Set placeholder text color to gray
         value={itemName}
         onChangeText={setItemName}
         style={styles.input}
       />
       <TextInput
-        placeholder="Enter location"
+        placeholder="Enter location 📍"
+        placeholderTextColor="gray" // Set placeholder text color to gray
         value={location}
         onChangeText={setLocation}
         style={styles.input}
@@ -117,16 +126,18 @@ const Add = () => {
         <Image source={{ uri: imageUri }} style={styles.imagePreview} />
       )}
 
+      {uploading && <ActivityIndicator size="large" color="#1fc485" style={styles.loader} />}
+
       <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-        <Text style={styles.buttonText}>Take Photo</Text>
+        <Text style={styles.buttonText}>📸 Take Photo</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => handleAddItem('check')}>
-        <Text style={styles.buttonText}>Add Item to Database</Text>
+        <Text style={styles.buttonText}>✅ Add Item to Database</Text>
       </TouchableOpacity>
 
       {itemAdded && (
-        <Text style={styles.successMessage}>Item added successfully!</Text>
+        <Text style={styles.successMessage}>🎉 Item added successfully!</Text>
       )}
     </View>
   );
@@ -136,12 +147,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20,
   },
+  header: {
+    fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#1fc485',
+  },
   input: {
     width: '100%', borderBottomWidth: 1, borderColor: '#ccc',
     fontSize: 18, marginBottom: 20, padding: 10,
+    color: 'gray',
+    placeholderTextColor: 'gray', // Updated placeholder text color to gray
   },
   imagePreview: {
     width: 200, height: 200, marginBottom: 20, borderRadius: 10,
+  },
+  loader: {
+    marginBottom: 20,
   },
   button: {
     backgroundColor: '#1fc485', paddingVertical: 15, paddingHorizontal: 40,
