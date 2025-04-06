@@ -5,9 +5,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -26,13 +24,27 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={DefaultTheme}>
-      <Stack initialRouteName="landing">
-      <Stack.Screen name="landing" options={{ headerShown: false }} />
-      <Stack.Screen name="index" options={{ title: "Home" }} />
-      <Stack.Screen name="add" options={{ title: "Add Item" }} />
-      <Stack.Screen name="search" options={{ title: "Search Items" }} />
-      <Stack.Screen name="view-all" options={{ title: "All Items" }} />
-    </Stack>
+      <Stack
+  screenOptions={{
+    headerStyle: {
+      backgroundColor: '#0f0f0f', // Match your dark background
+    },
+    headerTintColor: '#00ffd5', // Optional: matches your neon text
+    headerTitleStyle: {
+      fontFamily: 'SpaceMono',
+      fontWeight: 'bold',
+    },
+  }}
+>
+  <Stack.Screen name="landing" options={{ headerShown: false }} />
+  <Stack.Screen name="index" options={{ title: 'Home' }} />
+  <Stack.Screen name="add" options={{ title: 'Add Item' }} />
+  <Stack.Screen name="search" options={{ title: 'Search Items' }} />
+  <Stack.Screen name="view-all" options={{ title: 'All Items' }} />
+  <Stack.Screen name="+not-found" />
+</Stack>
+
+
         <StatusBar style="auto" />
       </ThemeProvider>
     </GestureHandlerRootView>
