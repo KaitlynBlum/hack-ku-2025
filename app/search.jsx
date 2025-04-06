@@ -44,41 +44,43 @@ const Search = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🔍 Search Items</Text>
+      <View style={styles.glassCard}>
+        <Text style={styles.title}>🔍 Search Items</Text>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          value={searchInput}
-          onChangeText={setSearchInput}
-          placeholder="Type item name here..."
-          placeholderTextColor="gray"
-        />
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>Search</Text>
-        </TouchableOpacity>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            value={searchInput}
+            onChangeText={setSearchInput}
+            placeholder="Type item name here..."
+            placeholderTextColor="#00ffd5"
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={styles.searchButtonText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Loading Indicator */}
+        {loading && <ActivityIndicator size="large" color="#00ffd5" style={styles.loader} />}
+
+        {/* Results */}
+        {result && (
+          <Animated.View style={[styles.resultContainer, { opacity: fadeAnim }]}>
+            <Text style={styles.results}>📍 Found {result.locations.length} location(s) for "{result.name}":</Text>
+            {result.locations.map((loc, index) => (
+              <Text key={index} style={styles.location}>• {loc}</Text>
+            ))}
+
+            {result.photo && (
+              <Image source={{ uri: result.photo }} style={styles.image} />
+            )}
+          </Animated.View>
+        )}
+
+        {/* Error Message */}
+        {error && <Text style={styles.error}>❌ {error}</Text>}
       </View>
-
-      {/* Loading Indicator */}
-      {loading && <ActivityIndicator size="large" color="#1fc485" style={styles.loader} />}
-
-      {/* Results */}
-      {result && (
-        <Animated.View style={[styles.resultContainer, { opacity: fadeAnim }]}>
-          <Text style={styles.results}>📍 Found {result.locations.length} location(s) for "{result.name}":</Text>
-          {result.locations.map((loc, index) => (
-            <Text key={index} style={styles.location}>• {loc}</Text>
-          ))}
-
-          {result.photo && (
-            <Image source={{ uri: result.photo }} style={styles.image} />
-          )}
-        </Animated.View>
-      )}
-
-      {/* Error Message */}
-      {error && <Text style={styles.error}>❌ {error}</Text>}
     </View>
   );
 };
@@ -86,15 +88,29 @@ const Search = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#0f0f0f',
     padding: 20,
-    backgroundColor: 'white',
+  },
+  glassCard: {
+    width: '100%',
+    padding: 25,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 255, 213, 0.1)',
+    borderColor: 'rgba(0, 255, 213, 0.4)',
+    borderWidth: 1,
+    alignItems: 'center',
+    shadowColor: '#00ffd5',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
   },
   title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#1fc485',
+    fontSize: 32,
+    fontWeight: '800',
+    fontFamily: 'SpaceMono',
+    color: '#00ffd5',
     marginBottom: 20,
   },
   searchContainer: {
@@ -104,17 +120,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   searchInput: {
-    width: '75%',
-    height: 40,
-    borderColor: '#ccc',
+    flex: 1,
+    height: 44,
+    borderColor: 'rgba(0, 255, 213, 0.4)',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
+    borderRadius: 12,
+    paddingHorizontal: 12,
     fontSize: 16,
-    color: 'black',
+    backgroundColor: 'rgba(0, 255, 213, 0.1)',
+    color: '#00ffd5',
+    fontFamily: 'SpaceMono',
   },
   searchButton: {
-    backgroundColor: '#1fc485',
+    backgroundColor: '#00ffd5',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -123,28 +141,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   searchButtonText: {
-    color: 'white',
+    color: '#0f0f0f',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'SpaceMono',
   },
   loader: {
     marginTop: 20,
   },
   results: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 5,
-    color: 'green',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#00ffd5',
+    fontFamily: 'SpaceMono',
+    marginBottom: 10,
   },
   location: {
     fontSize: 16,
-    color: '#333',
+    color: '#ffffff',
+    fontFamily: 'SpaceMono',
   },
   error: {
-    color: 'red',
+    color: '#ff4d4d',
     marginTop: 20,
     fontSize: 16,
+    fontFamily: 'SpaceMono',
   },
   image: {
     width: 200,
@@ -152,18 +173,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#1fc485',
+    borderColor: '#00ffd5',
   },
   resultContainer: {
     alignItems: 'center',
     marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f0fdf6',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    padding: 20,
+    backgroundColor: 'rgba(0,255,213,0.1)',
+    borderRadius: 20,
+    shadowColor: '#00ffd5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
 });
 

@@ -105,72 +105,118 @@ const Add = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>📝 Add New Item</Text>
+      <View style={styles.glassCard}>
+        <Text style={styles.header}>📝 Add New Item</Text>
 
-      <TextInput
-        placeholder="Enter item name 🏷️"
-        placeholderTextColor="gray" // Set placeholder text color to gray
-        value={itemName}
-        onChangeText={setItemName}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Enter location 📍"
-        placeholderTextColor="gray" // Set placeholder text color to gray
-        value={location}
-        onChangeText={setLocation}
-        style={styles.input}
-      />
+        <TextInput
+          placeholder="Enter item name 🏷️"
+          placeholderTextColor="gray"
+          value={itemName}
+          onChangeText={setItemName}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Enter location 📍"
+          placeholderTextColor="gray"
+          value={location}
+          onChangeText={setLocation}
+          style={styles.input}
+        />
 
-      {imageUri && (
-        <Image source={{ uri: imageUri }} style={styles.imagePreview} />
-      )}
+        {imageUri && (
+          <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+        )}
 
-      {uploading && <ActivityIndicator size="large" color="#1fc485" style={styles.loader} />}
+        {uploading && <ActivityIndicator size="large" color="#00ffd5" style={styles.loader} />}
 
-      <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-        <Text style={styles.buttonText}>📸 Take Photo</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.glassButton} onPress={handleTakePhoto}>
+          <Text style={styles.buttonText}>📸 Take Photo</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => handleAddItem('check')}>
-        <Text style={styles.buttonText}>✅ Add Item to Database</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.glassButton} onPress={() => handleAddItem('check')}>
+          <Text style={styles.buttonText}>✅ Add Item</Text>
+        </TouchableOpacity>
 
-      {itemAdded && (
-        <Text style={styles.successMessage}>🎉 Item added successfully!</Text>
-      )}
+        {itemAdded && (
+          <Text style={styles.successMessage}>🎉 Item added successfully!</Text>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0f0f0f',
+    paddingHorizontal: 20,
+  },
+  glassCard: {
+    width: '100%',
+    padding: 30,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 255, 213, 0.1)',
+    borderColor: 'rgba(0, 255, 213, 0.4)',
+    borderWidth: 1,
+    alignItems: 'center',
+    shadowColor: '#00ffd5',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
   },
   header: {
-    fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#1fc485',
+    fontSize: 28,
+    fontWeight: '800',
+    fontFamily: 'SpaceMono',
+    color: '#00ffd5',
+    marginBottom: 20,
   },
   input: {
-    width: '100%', borderBottomWidth: 1, borderColor: '#ccc',
-    fontSize: 18, marginBottom: 20, padding: 10,
-    color: 'gray',
-    placeholderTextColor: 'gray', // Updated placeholder text color to gray
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: '#00ffd5',
+    fontSize: 18,
+    marginBottom: 20,
+    padding: 10,
+    fontFamily: 'SpaceMono',
+    color: '#00ffd5',
   },
   imagePreview: {
-    width: 200, height: 200, marginBottom: 20, borderRadius: 10,
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 10,
+    borderColor: '#00ffd5',
+    borderWidth: 2,
   },
   loader: {
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: '#1fc485', paddingVertical: 15, paddingHorizontal: 40,
-    borderRadius: 20, marginTop: 10, alignItems: 'center', justifyContent: 'center',
+  glassButton: {
+    backgroundColor: 'rgba(0, 255, 213, 0.15)',
+    borderColor: 'rgba(0, 255, 213, 0.4)',
+    borderWidth: 1,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    marginVertical: 10,
+    width: '100%',
+    alignItems: 'center',
   },
   buttonText: {
-    color: 'white', fontSize: 18, fontWeight: 'bold',
+    color: '#00ffd5',
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'SpaceMono',
   },
   successMessage: {
-    fontSize: 16, fontWeight: 'bold', color: 'green', marginTop: 20,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#00ffd5',
+    marginTop: 20,
+    fontFamily: 'SpaceMono',
   },
 });
 

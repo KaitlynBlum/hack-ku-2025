@@ -63,7 +63,7 @@ export default function ViewAll() {
   );
 
   const renderItem = ({ item }) => {
-    if (!item || !item.name) return null; // Ensure item and name exist
+    if (!item || !item.name) return null;
 
     return (
       <Swipeable renderRightActions={() => renderRightActions(item.name)}>
@@ -84,19 +84,21 @@ export default function ViewAll() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>📦 All Stored Items</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#1fc485" />
-      ) : error ? (
-        <Text style={styles.error}>{error}</Text>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item, index) => (item.name || 'unknown') + index}
-          renderItem={renderItem}
-          contentContainerStyle={styles.list}
-        />
-      )}
+      <View style={styles.glassCard}>
+        <Text style={styles.title}>📦 All Stored Items</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#00ffd5" />
+        ) : error ? (
+          <Text style={styles.error}>{error}</Text>
+        ) : (
+          <FlatList
+            data={items}
+            keyExtractor={(item, index) => (item.name || 'unknown') + index}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -104,30 +106,50 @@ export default function ViewAll() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 20,
+    backgroundColor: '#0f0f0f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  glassCard: {
+    width: '100%',
+    padding: 20,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 255, 213, 0.1)',
+    borderColor: 'rgba(0, 255, 213, 0.4)',
+    borderWidth: 1,
+    shadowColor: '#00ffd5',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1fc485',
+    fontWeight: '800',
+    fontFamily: 'SpaceMono',
+    color: '#00ffd5',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   list: {
-    padding: 20,
+    paddingBottom: 100,
   },
   card: {
-    backgroundColor: '#f0fdf6',
-    borderRadius: 12,
+    backgroundColor: 'rgba(0,255,213,0.1)',
+    borderRadius: 20,
     padding: 15,
     marginBottom: 15,
+    shadowColor: '#00ffd5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
   itemName: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#222',
+    color: '#00ffd5',
+    fontFamily: 'SpaceMono',
   },
   image: {
     width: '100%',
@@ -137,12 +159,14 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 16,
-    color: '#555',
+    color: '#ffffff',
+    fontFamily: 'SpaceMono',
   },
   locationEmpty: {
     fontSize: 16,
     color: 'gray',
     fontStyle: 'italic',
+    fontFamily: 'SpaceMono',
   },
   deleteBox: {
     backgroundColor: '#ff4d4d',
@@ -158,8 +182,9 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: 16,
-    color: 'red',
+    color: '#ff4d4d',
     textAlign: 'center',
     marginTop: 20,
+    fontFamily: 'SpaceMono',
   },
 });
