@@ -1,46 +1,66 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 
 const Search = () => {
   const router = useRouter();
-  const { searchItem } = router.query || {}; // Access passed search parameter, handle case when undefined
-  const [searchInput, setSearchInput] = useState(''); // Local state for search input
+  const [searchInput, setSearchInput] = useState('');
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Handle the search input change and update the router query
-  const handleSearch = () => {
-    router.push({
-      pathname: '/search',
-      query: { searchItem: searchInput }, // Pass updated search query
-    });
+  const handleSearch = async () => {
+    if (!searchInput) return;
+
+    try {
+      const response = await fetch(`http://10.104.117.117:5050/retrieve?name=${searchInput}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setResult(data);
+        setError(null);
+      } else {
+        setError(data.error);
+        setResult(null);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong.');
+      setResult(null);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Search</Text>
 
-      {/* Search Bar and Button */}
+      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           value={searchInput}
-          onChangeText={setSearchInput} // Update the local state
+          onChangeText={setSearchInput}
           placeholder="Enter item to search"
         />
-        <TouchableOpacity
-          style={styles.searchButton}
-          onPress={handleSearch} // Trigger the search functionality
-        >
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Display search results */}
-      {searchItem ? (
-        <Text style={styles.results}>Searching for: {searchItem}</Text>
-      ) : (
-        <Text style={styles.results}>No search item provided</Text>
+      {/* Results */}
+      {result && (
+        <View style={styles.resultContainer}>
+          <Text style={styles.results}>You have {result.locations.length} {result.name}(s) at:</Text>
+          {result.locations.map((loc, index) => (
+            <Text key={index} style={styles.location}>• {loc}</Text>
+          ))}
+
+          {result.photo && (
+            <Image source={{ uri: result.photo }} style={styles.image} />
+          )}
+        </View>
       )}
+
+      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 };
@@ -92,6 +112,26 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
+    marginBottom: 5,
+    color: 'green',
+  },
+  location: {
+    fontSize: 16,
+    color: '#333',
+  },
+  error: {
+    color: 'red',
+    marginTop: 20,
+    fontSize: 16,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginTop: 20,
+    borderRadius: 10,
+  },
+  resultContainer: {
+    alignItems: 'center',
   },
 });
 
