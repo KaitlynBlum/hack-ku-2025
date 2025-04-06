@@ -1,78 +1,55 @@
-import React, { useState } from 'react'; 
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native'; 
-import { useRouter } from 'expo-router'; 
-import Add from './add'; // Import the Add component 
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
-const Index = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);  // State for modal visibility
-
-  const handleItemAdded = () => {
-    setIsModalVisible(true);  // Show the pop-up when the item is added
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);  // Close the pop-up
-  };
+export default function Home() {
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
-      {/* Add Item Button */}
-      <Add onItemAdded={handleItemAdded} />
+      <Text style={styles.title}>Item Tracker</Text>
 
-      {/* Pop-up Modal */}
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={handleCloseModal}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Item has been added to the database!</Text>
-            <TouchableOpacity style={styles.modalButton} onPress={handleCloseModal}>
-              <Text style={styles.modalButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/add')}>
+        <Text style={styles.buttonText}>➕ Add New Item</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/search')}>
+        <Text style={styles.buttonText}>🔍 Search Item</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/view-all')}>
+        <Text style={styles.buttonText}>📦 View All Items</Text>
+      </TouchableOpacity>
+
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    width: 300,
+    backgroundColor: '#f5f5f5',
     padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1fc485',
+    marginBottom: 40,
+  },
+  button: {
+    backgroundColor: '#1fc485',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    marginVertical: 10,
+    width: '80%',
     alignItems: 'center',
   },
-  modalText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  modalButton: {
-    backgroundColor: '#1fc485',
-    padding: 10,
-    borderRadius: 20,
-  },
-  modalButtonText: {
+  buttonText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
-
-export default Index;

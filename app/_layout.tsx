@@ -1,4 +1,5 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -20,21 +21,20 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
-    <ThemeProvider value={DefaultTheme}>
-      <Stack>
-        {/* Home screen */}
-        <Stack.Screen name="index" options={{ title: "Home" }} />
-        {/* Add and Search screens */}
-        <Stack.Screen name="add" options={{ title: "Add Item" }} />
-        <Stack.Screen name="search" options={{ title: "Search Items" }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={DefaultTheme}>
+      <Stack initialRouteName="landing">
+      <Stack.Screen name="landing" options={{ headerShown: false }} />
+      <Stack.Screen name="index" options={{ title: "Home" }} />
+      <Stack.Screen name="add" options={{ title: "Add Item" }} />
+      <Stack.Screen name="search" options={{ title: "Search Items" }} />
+      <Stack.Screen name="view-all" options={{ title: "All Items" }} />
+    </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

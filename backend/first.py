@@ -1,69 +1,106 @@
+from flask import Flask, request, jsonify
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import credentials, firestore, storage
+import uuid
+import base64
+from werkzeug.utils import secure_filename
+from flask_cors import CORS
 
+app = Flask(__name__)
+CORS(app)
 
-cred = credentials.Certificate('D:\IMP\HackKU Project\Service_account_file.json')
-firebase_admin.initialize_app(cred)
+cred = credentials.Certificate('/Users/rijulpoudel/Desktop/hack-ku-2025/backend/service_account_file.json')
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'skrrv-94cf5.firebasestorage.com'  # ✅ CORRECT!
+})
 
 db = firestore.client()
+bucket = storage.bucket()
 
-def cls():
-    import os
-    os.system('cls')
+@app.route('/store', methods=['POST'])
+def store_item():
+    data = request.get_json()
+    name = data.get('name')
+    location = data.get('location')
+    photo_url = data.get('imageUrl')
 
-cls()
+    if not name or not location:
+        return jsonify({'error': 'Missing fields'}), 400
 
-def store_item(item_name, item_location):
-    
-    doc_ref = db.collection('item').document('Location & Names')
-
-    doc_ref.set({
-        'name': item_name,
-        'location' : item_location
-    })
-
-    print(f"Item '{item_name}' has been stored successfully!")
-
-def retrieve_item(item_name):
-
-    doc_ref = db.collection('item').document('Location & Names')
-    
+    doc_ref = db.collection('item').document(name)
     doc = doc_ref.get()
 
     if doc.exists:
-
-        print(f"Item '{item_name}' is stored at {doc.to_dict()['location']}.")
-    
+        item = doc.to_dict()
+        locations = item.get('locations', [])
+        if location not in locations:
+            locations.append(location)
+        doc_ref.update({
+            'locations': locations,
+            'photo': photo_url or item.get('photo')
+        })
+        return jsonify({'message': f"Updated {name}", 'photo': photo_url})
     else:
+        doc_ref.set({
+            'name': name,
+            'locations': [location],
+            'photo': photo_url
+        })
+        return jsonify({'message': f"Stored {name}", 'photo': photo_url})
 
-        print(f"Item '{item_name}' not found.")
+@app.route('/retrieve', methods=['GET'])
+def retrieve_item():
+    name = request.args.get('name')
+    doc = db.collection('item').document(name).get()
+    if doc.exists:
+        return jsonify(doc.to_dict())
+    else:
+        return jsonify({'error': 'Item not found'}), 404
 
-def main():
-    while True:
-        
-        print("\nWelcome to the Item Locator!")
-        print("1. Store an item")
-        print("2. Retrieve an item")
-        print("3. Exit")
-        
-        choice = input("Choose an option: ")
+@app.route('/upload-image', methods=['POST'])
+def upload_image():
+    try:
+        image = request.files['image']
+        if not image:
+            return jsonify({'error': 'No image file provided'}), 400
 
-        if choice == "1":
-            cls()
-            item_name = input("Enter the name of the item: ")
-            item_location = input("Enter the location of the item: ")
-            store_item(item_name, item_location)
-        elif choice == "2":
-            cls()
-            item_name = input("Enter the name of the item to search: ")
-            retrieve_item(item_name)
-        elif choice == "3":
-            print("Closing the app!")
-            break
-        else:
-            print("Invalid choice. Please try again.")
+        filename = secure_filename(image.filename)
+        blob = bucket.blob(f'images/{uuid.uuid4().hex}_{filename}')
+        blob.upload_from_file(image, content_type='image/jpeg')
+        blob.make_public()
 
-# Run the program
-if __name__ == "__main__":
-    main()
+        return jsonify({'imageUrl': blob.public_url})
+    
+    except Exception as e:
+        print(f"Upload failed: {e}")
+        return jsonify({'error': 'Upload failed', 'details': str(e)}), 500
+
+@app.route('/all-items', methods=['GET'])
+def all_items():
+    docs = db.collection('item').stream()
+    results = []
+    for doc in docs:
+        item = doc.to_dict()
+        results.append({
+            'name': item.get('name'),
+            'locations': item.get('locations', []),
+            'photo': item.get('photo', None)
+        })
+    return jsonify(results)
+
+@app.route('/delete-item', methods=['DELETE'])
+def delete_item():
+    name = request.args.get('name')
+    if not name:
+        return jsonify({'error': 'Name required'}), 400
+
+    doc_ref = db.collection('item').document(name)
+    doc = doc_ref.get()
+    if doc.exists:
+        doc_ref.delete()
+        return jsonify({'message': f"{name} deleted"})
+    else:
+        return jsonify({'error': f"{name} not found"}), 404
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5050, debug=True)
